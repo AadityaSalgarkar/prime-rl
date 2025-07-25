@@ -22,13 +22,28 @@ Given a sentence where X% of words have been randomly replaced with near-synonym
 - **Expected Output**: "She opened the ancient door."
 - **Reward**: 2/2 = 1.0 (all words match exactly)
 
+## Setup Instructions
+
+### Prerequisites
+Before running the environment, you need to download the thesaurus data:
+
+```bash
+# Navigate to the thesaurus replacement environment directory
+cd envs/thesaurus_replacement/
+
+# Download the thesaurus data (WordNet-based synonyms)
+curl -O https://raw.githubusercontent.com/zaibacu/thesaurus/master/en_thesaurus.jsonl
+```
+
+**Note**: The `en_thesaurus.jsonl` file (~23MB) contains WordNet synonym data and is not committed to the repository due to its size.
+
 ## Implementation Details
 
 ### Data Augmentation Strategy
 - Uses the repo github.com/zaibacu/thesaurus to find near-synonyms
-- Among the words with available synonyms, randomly selects 20% of words in each sentence for replacement
-- Only replaces words that have available synonyms
+- Among the words with available synonyms, randomly selects 30% of words in each sentence for replacement
 - Maintains grammatical structure and sentence length where possible
+- Uses TinyStories dataset for diverse, natural sentence examples
 
 ### Reward Function
 - **Word-level exact matching**: Each word position is compared exactly
@@ -87,3 +102,31 @@ The environment can be run using:
     --inference @
   envs/thesaurus_replacement/inference_config.toml
 ```
+
+## Registry Implementation
+
+The environment is implemented in `src/prime_rl/environments/registry.py` through the `load_thesaurus_replacement_environment()` function. This function:
+
+### Key Features
+- **Environment ID**: `"thesaurus-replacement"` (registered in the REGISTRY)
+- **Environment Type**: Training environment for RLVR
+- **Tags**: `["instruction-following", "text-reconstruction"]`
+
+### Function Parameters
+```python
+def load_thesaurus_replacement_environment(
+    replacement_rate: float = 0.3,        # Fraction of words to replace (30%)
+    min_synonyms: int = 2,                # Minimum synonyms required (filtering)
+    preserve_case: bool = True,           # Preserve original capitalization
+    num_examples: int = 1000,             # Number of training examples
+    **kwargs
+) -> Environment
+```
+
+### Implementation Details
+- Loads thesaurus data from `envs/thesaurus_replacement/en_thesaurus.jsonl`
+- Extracts sentences from TinyStories dataset (5-15 words, containing replaceable words)
+- Creates training examples with original/augmented text pairs
+- Uses `vf.SingleTurnEnv` with custom word-level accuracy reward function
+- Reward function computes exact word matching with length penalty
+- Returns a fully configured RLVR environment ready for training
