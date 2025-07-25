@@ -666,6 +666,142 @@ def load_wordle_nothink_environment(num_train_examples: int = 2000, num_eval_exa
     return vf_env
 
 
+def load_thesaurus_replacement_environment(
+    replacement_rate: float = 0.3,
+    min_synonyms: int = 2,
+    preserve_case: bool = True,
+    num_examples: int = 1000,
+    **kwargs
+) -> Environment:
+    """
+    Load thesaurus replacement environment for RLVR training.
+    
+    The environment tests a model's ability to reconstruct original text
+    from synonym-corrupted versions.
+    
+    Args:
+        replacement_rate: Fraction of words to replace with synonyms (default: 0.3)
+        min_synonyms: Minimum number of synonyms required for replacement (default: 2)
+        preserve_case: Whether to preserve original capitalization (default: True)
+        num_examples: Number of training examples to generate (default: 1000)
+    """
+    import random
+    import sys
+    from pathlib import Path
+    
+    # Add the thesaurus_replacement directory to path
+    env_dir = Path(__file__).parent.parent.parent / "envs" / "thesaurus_replacement"
+    sys.path.insert(0, str(env_dir))
+    
+    from thesaurus_loader import ThesaurusLoader
+    
+    # Load thesaurus data
+    thesaurus = ThesaurusLoader()
+    
+    # Load stories from TinyStories dataset
+    tinystories_dataset = load_dataset("roneneldan/TinyStories", split="train")
+    
+    # Extract sentences from stories (limit to reasonable length)
+    base_sentences = []
+    for story in tinystories_dataset.take(500):  # Take first 500 stories
+        text = story["text"]
+        # Split into sentences and take reasonably short ones
+        import re
+        sentences = re.split(r'[.!?]+', text)
+        for sentence in sentences:
+            sentence = sentence.strip()
+            # Use sentences that are 5-15 words long and contain replaceable words
+            word_count = len(sentence.split())
+            if 5 <= word_count <= 15 and thesaurus.get_replaceable_words(sentence):
+                base_sentences.append(sentence + ".")
+                if len(base_sentences) >= 100:  # Limit to 100 sentences
+                    break
+        if len(base_sentences) >= 100:
+            break
+    
+    # Generate training examples
+    examples = []
+    random.seed(42)  # For reproducibility
+    
+    for _ in range(num_examples):
+        # Select random sentence
+        original_sentence = random.choice(base_sentences)
+        
+        # Create augmented version with synonym replacements
+        augmented_sentence, replacements = thesaurus.replace_with_synonyms(
+            original_sentence, replacement_rate
+        )
+        
+        # Only include if we actually made replacements
+        if replacements:
+            examples.append({
+                "question": f"Restore the original text: {augmented_sentence}",
+                "answer": original_sentence,
+                "info": {
+                    "original": original_sentence,
+                    "augmented": augmented_sentence,
+                    "replacements": replacements
+                },
+                "task": "thesaurus-replacement",
+            })
+    
+    # Create dataset
+    from datasets import Dataset
+    dataset = Dataset.from_list(examples)
+    dataset = dataset.shuffle(seed=42)
+    
+    # Define parser (simple text parser)
+    parser = vf.Parser()
+    
+    def word_level_accuracy_reward(completion, answer, **kwargs) -> float:
+        """
+        Compute word-level exact matching reward.
+        Returns fraction of words that match exactly.
+        """
+        import re
+        
+        # Parse completion
+        response = parser.parse_answer(completion) or ""
+        
+        # Basic whitespace normalization
+        response = response.strip()
+        answer = answer.strip()
+        
+        # Tokenize into words (preserving case)
+        response_words = re.findall(r'\b\w+\b', response)
+        answer_words = re.findall(r'\b\w+\b', answer)
+        
+        if not answer_words:
+            return 0.0
+        
+        # Count exact matches
+        matches = 0
+        for i in range(min(len(response_words), len(answer_words))):
+            if response_words[i] == answer_words[i]:
+                matches += 1
+        
+        # Penalize length mismatch
+        if len(response_words) != len(answer_words):
+            matches = min(matches, len(answer_words) - abs(len(response_words) - len(answer_words)))
+        
+        return max(0.0, matches / len(answer_words))
+    
+    # Create rubric
+    rubric = vf.Rubric(
+        funcs=[word_level_accuracy_reward],
+        weights=[1.0],
+    )
+    
+    # Create environment
+    vf_env = vf.SingleTurnEnv(
+        dataset=dataset,
+        parser=parser,
+        rubric=rubric,
+    )
+    
+    return vf_env
+
+
 ### Eval Environments ###
 
 
@@ -938,6 +1074,11 @@ REGISTRY = {
         "load_fn": load_sentence_repeater_environment,
         "type": "train",
         "tags": ["instruction"],
+    },
+    "thesaurus-replacement": {
+        "load_fn": load_thesaurus_replacement_environment,
+        "type": "train",
+        "tags": ["instruction-following", "text-reconstruction"],
     },
     "unscramble": {
         "load_fn": load_unscramble_environment,

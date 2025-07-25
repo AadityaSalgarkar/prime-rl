@@ -1,0 +1,19 @@
+batch_size = 128
+micro_batch_size = 16
+rollouts_per_prompt = 16
+seq_len = 128
+max_steps = 30
+mask_truncated_completions = false
+
+[model]
+name = "Qwen/Qwen2.5-0.5B-Instruct"
+
+[environment]
+id = "thesaurus-replacement"
+
+[environment.args]
+replacement_rate = 0.3
+num_examples = 1000
+
+[sampling]
+max_tokens = 128
