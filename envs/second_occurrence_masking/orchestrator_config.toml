@@ -1,0 +1,29 @@
+# Orchestrator configuration for Second Occurrence Masking environment
+
+batch_size = 8
+async_level = 2  # Allow some async processing for efficiency
+
+[environment]
+id = "second-occurrence-masking"
+
+[environment.args]
+# Environment-specific parameters
+dataset_name = "roneneldan/TinyStories"  # Good source for varied text
+min_length = 50
+max_length = 300
+min_masks = 1
+max_masks = 5  # Start conservative, can increase later
+content_words_only = true  # Focus on meaningful words
+num_examples = 1000
+
+[data]
+num_examples = 1000
+max_parallel = 8
+
+[rollout]
+save_dir = "rollouts"
+max_size = 10000
+
+[ckpt]
+save_every = 10
+resume_step = null

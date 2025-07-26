@@ -1,0 +1,36 @@
+# Training configuration for Second Occurrence Masking environment
+# Start with conservative settings for testing, then scale up
+
+max_steps = 30
+batch_size = 8
+micro_batch_size = 1
+learning_rate = 3e-6
+warmup_steps = 3
+
+[model]
+name = "Qwen/Qwen2.5-0.5B-Instruct"  # Start with small model for testing
+max_model_len = 2048
+compile = false
+ac = false  # gradient checkpointing
+
+[optimizer]
+name = "adamw"
+weight_decay = 0.01
+beta1 = 0.9
+beta2 = 0.999
+
+[scheduler]
+name = "cosine"
+warmup_steps = 3
+eta_min_ratio = 0.1
+
+[ckpt]
+save_every = 10
+save_weights_every = 5
+
+[logging]
+log_every = 1
+eval_every = 10
+
+[data]
+seq_len = 512  # Reasonable length for mask filling tasks

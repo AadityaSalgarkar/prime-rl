@@ -1,0 +1,15 @@
+# Local Ollama inference configuration for Second Occurrence Masking environment
+# Copy this to inference_config.toml to use with local Ollama
+
+[model]
+name = "qwen2.5:0.5b-instruct"  # Ollama model name format
+max_model_len = 2048
+base_url = "http://localhost:11434/v1"
+api_key = "ollama"
+
+[server]
+host = "0.0.0.0"
+port = 8000
+
+# Note: vLLM settings are not applicable for Ollama
+# Ollama manages its own GPU memory and parallelism

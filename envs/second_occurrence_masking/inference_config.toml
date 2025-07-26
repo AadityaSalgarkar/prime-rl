@@ -1,0 +1,24 @@
+# Inference server configuration for Second Occurrence Masking environment
+
+[model]
+name = "Qwen/Qwen2.5-0.5B-Instruct"
+max_model_len = 2048
+dtype = "auto"
+
+[server]
+host = "0.0.0.0"
+port = 8000
+# For local testing, you can change port to avoid conflicts
+# port = 8001
+
+[vllm]
+# GPU memory and performance settings
+gpu_memory_utilization = 0.8
+tensor_parallel_size = 1
+pipeline_parallel_size = 1
+max_num_seqs = 256
+max_num_batched_tokens = 8192
+
+# Enable for better throughput on newer GPUs
+enable_prefix_caching = false
+use_v2_block_manager = false

@@ -1,0 +1,17 @@
+# Mock inference configuration for Second Occurrence Masking environment
+# Copy this to inference_config.toml to use with mock inference server
+
+[model]
+name = "mock-masking-aware"  # Mock model that understands masking tasks
+max_model_len = 2048
+base_url = "http://localhost:8888/v1"
+api_key = "mock"
+
+[server]
+host = "0.0.0.0"
+port = 8000
+
+[mock]
+# Mock-specific settings
+mode = "masking_aware"  # Options: identity, simple_completion, masking_aware
+accuracy = 0.8  # Simulated accuracy for testing rewards

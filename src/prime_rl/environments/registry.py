@@ -666,6 +666,110 @@ def load_wordle_nothink_environment(num_train_examples: int = 2000, num_eval_exa
     return vf_env
 
 
+def load_second_occurrence_masking_environment(
+    dataset_name: str = "roneneldan/TinyStories",
+    min_length: int = 50,
+    max_length: int = 300,
+    min_masks: int = 1,
+    max_masks: int = 10,
+    content_words_only: bool = True,
+    num_examples: int = 1000,
+    **kwargs
+) -> Environment:
+    """Load second occurrence masking environment with configurable parameters."""
+    import sys
+    import os
+    from pathlib import Path
+    
+    # Add the environment directory to Python path
+    env_dir = Path(__file__).parent.parent.parent.parent / "envs" / "second_occurrence_masking"
+    if str(env_dir) not in sys.path:
+        sys.path.append(str(env_dir))
+    
+    from second_occurrence_loader import SecondOccurrenceMaskingLoader
+    
+    # Initialize the loader
+    loader = SecondOccurrenceMaskingLoader(
+        dataset_name=dataset_name,
+        min_length=min_length,
+        max_length=max_length,
+        min_masks=min_masks,
+        max_masks=max_masks,
+        content_words_only=content_words_only,
+        **kwargs
+    )
+    
+    # Generate dataset examples
+    examples = []
+    for i in range(num_examples):
+        try:
+            # Get sample text and mask it
+            text = loader.get_sample_text()
+            result = loader.mask_text(text)
+            
+            # Skip examples with no masks
+            if not result.target_words:
+                continue
+                
+            # Create the training example
+            example = {
+                "question": f"Fill in the [MASK] tokens with the original words: {result.masked_text}",
+                "answer": " ".join(result.target_words),
+                "info": {
+                    "original_text": result.original_text,
+                    "masked_text": result.masked_text,
+                    "target_words": result.target_words,
+                    "mask_positions": result.mask_positions,
+                    "metadata": result.metadata
+                },
+                "task": "second-occurrence-masking"
+            }
+            examples.append(example)
+            
+        except Exception as e:
+            print(f"Error generating example {i}: {e}")
+            continue
+            
+        if len(examples) >= num_examples:
+            break
+    
+    # Convert to HuggingFace dataset format
+    from datasets import Dataset
+    dataset = Dataset.from_list(examples)
+    
+    # Create parser for extracting answers
+    parser = vf.Parser()
+    
+    def mask_filling_reward_func(completion, answer, info, **kwargs) -> float:
+        """Calculate reward based on correct mask filling."""
+        response = parser.parse_answer(completion) or ""
+        target_words = info.get("target_words", [])
+        mask_positions = info.get("mask_positions", [])
+        original_text = info.get("original_text", "")
+        
+        return loader.calculate_reward(original_text, response, mask_positions, target_words)
+    
+    rubric = vf.Rubric(
+        funcs=[mask_filling_reward_func],
+        weights=[1.0]
+    )
+    
+    system_prompt = """You are tasked with filling in [MASK] tokens with the original words that were replaced. 
+
+Look at the context carefully and determine what words were originally in the masked positions. Each [MASK] represents a single word that appeared earlier in the text.
+
+Provide your answer as a space-separated list of the words that should replace each [MASK] in order."""
+    
+    vf_env = vf.SingleTurnEnv(
+        dataset=dataset,
+        system_prompt=system_prompt,
+        parser=parser,
+        rubric=rubric
+    )
+    
+    return vf_env
+
+
 ### Eval Environments ###
 
 
@@ -958,6 +1062,11 @@ REGISTRY = {
         "load_fn": load_wordle_nothink_environment,
         "type": "train",
         "tags": ["game", "multi-turn"],
+    },
+    "second-occurrence-masking": {
+        "load_fn": load_second_occurrence_masking_environment,
+        "type": "train",
+        "tags": ["instruction-following", "text-reconstruction", "mask-filling"],
     },
     # eval
     "gpqa": {
