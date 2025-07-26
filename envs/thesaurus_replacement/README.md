@@ -185,6 +185,49 @@ cp inference_config_mock.toml inference_config.toml
 
 This enables end-to-end testing of the training pipeline without requiring external models or GPU resources.
 
+## Complete Pipeline Testing (macOS Compatible)
+
+For testing the full trainer + orchestrator + inference workflow on macOS:
+
+```bash
+# Test individual mock trainer (simulates full RL training)
+./mock_trainer.py --steps 20 --batch-size 8
+
+# Test full pipeline integration
+./tests/test_full_pipeline.py
+
+# Test all components together
+./tests/run_all_tests.py
+```
+
+**Mock Training Features:**
+- 🔄 **Complete RL Simulation**: Orchestrator + Trainer + Inference in one script
+- 💻 **macOS Compatible**: Works without CUDA or GPU requirements
+- 📊 **Rich Console Output**: Beautiful training progress display
+- 💾 **Checkpoint Simulation**: Saves training state like real trainer
+- 🎯 **Realistic Metrics**: Loss, reward, gradient norms, timing
+
+**Pipeline Components Tested:**
+1. **Environment**: Thesaurus data loading and synonym replacement
+2. **Orchestrator**: Batch generation and reward calculation  
+3. **Inference**: Mock model responses via OpenAI-compatible API
+4. **Trainer**: Simulated training loop with metrics and checkpointing
+
+Example output:
+```
+🚀 Starting Mock Training for Thesaurus Replacement Environment
+       Training Step 5        
+┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric            ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Loss              │ 0.7623 │
+│ Reward            │ 0.2448 │
+│ Cumulative Reward │ 0.2116 │
+│ Grad Norm         │ 1.2479 │
+│ Elapsed Time      │ 0.5s   │
+└───────────────────┴────────┘
+```
+
 ### Test Output Example
 ```
 🚀 Testing Thesaurus Replacement Environment
