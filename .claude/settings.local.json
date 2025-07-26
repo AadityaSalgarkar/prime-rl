@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run:*)",
+      "Bash(git checkout:*)",
+      "Bash(chmod +x test_environment.py)",
+      "Bash(./test_environment.py)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(./tests/run_all_tests.py)",
+      "Bash(./tests/test_inference_ollama.py)",
+      "mcp__ide__getDiagnostics",
+      "Bash(chmod:*)",
+      "Bash(./tests/test_mock_inference.py)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": []
+  }
+}
