@@ -1,0 +1,22 @@
+# Mock inference configuration for testing training pipeline
+# Uses identity model that returns input as output
+
+[model]
+name = "mock-identity"  # Special identifier for mock model
+base_url = "http://localhost:8888/v1"  # Mock server endpoint
+api_key = "mock"  # Mock API key
+
+[server]
+port = 8888
+host = "0.0.0.0"
+
+# Mock-specific settings
+[mock]
+mode = "identity"  # Options: identity, simple_completion, thesaurus_aware
+enable_logging = true
+
+# Sampling settings (will be ignored by mock but kept for compatibility)
+[sampling]
+temperature = 0.0  # Deterministic for testing
+max_tokens = 128
+top_p = 1.0

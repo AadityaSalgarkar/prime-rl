@@ -99,10 +99,10 @@ The environment includes a comprehensive test suite that validates all component
 
 ```bash
 # Run the standalone test script
-./test_thesaurus.py
+./tests/test_thesaurus.py
 
 # Or using uv directly
-uv run --script test_thesaurus.py
+uv run --script tests/test_thesaurus.py
 ```
 
 The test suite validates:
@@ -110,6 +110,80 @@ The test suite validates:
 - ✅ **ThesaurusLoader**: Synonym lookup and text replacement functionality  
 - ✅ **Reward Function**: Word-level accuracy scoring logic
 - ✅ **Environment Integration**: Configuration files and registry setup
+
+## Testing with Ollama (Local LLM)
+
+For testing with local Ollama models:
+
+```bash
+# Test Ollama integration
+./tests/test_inference_ollama.py
+```
+
+**Prerequisites for Ollama testing:**
+1. Install Ollama: https://ollama.ai
+2. Start Ollama server: `ollama serve`
+3. Install the matching model: `ollama pull qwen2.5:0.5b-instruct`
+
+The Ollama test suite validates:
+- 🔗 **Ollama Connection**: API availability and model detection
+- 🧠 **Basic Inference**: Simple completion testing
+- 🎯 **Environment Integration**: Thesaurus task with Ollama models
+- ⚙️ **Config Compatibility**: Configuration file validation
+- 📊 **Model Recommendations**: Best models for text reconstruction
+
+**Using Ollama Configuration:**
+```bash
+# Copy the Ollama config template
+cp inference_config_ollama.toml inference_config.toml
+
+# Edit the model name to match your installed Ollama model
+# [model]
+# name = "qwen2.5:0.5b-instruct"  # matches training config
+```
+
+## Running All Tests
+
+To run both core functionality and Ollama integration tests:
+
+```bash
+# Run complete test suite
+./tests/run_all_tests.py
+```
+
+This will run both test suites and provide a comprehensive validation report.
+
+## Testing with Mock Inference (Training Pipeline)
+
+For testing the complete training pipeline without requiring actual models:
+
+```bash
+# Test mock inference system
+./tests/test_mock_inference.py
+
+# Start mock server for training tests
+./mock_server.py &
+
+# Use mock configuration for training
+cp inference_config_mock.toml inference_config.toml
+```
+
+**Mock Inference Features:**
+- 🔄 **Identity Model**: Returns input as output (perfect for testing)
+- 📝 **Simple Completions**: Basic sentence completion for testing
+- 🎯 **Thesaurus-Aware**: Attempts basic synonym restoration
+- 🚀 **Fast**: No GPU required, instant responses
+- 🔌 **OpenAI Compatible**: Drop-in replacement for real inference
+
+**Mock Testing Modes:**
+```python
+# Available mock modes:
+"identity"           # Input = Output (perfect accuracy testing)
+"simple_completion"  # Basic completions for general testing  
+"thesaurus_aware"    # Heuristic-based synonym restoration
+```
+
+This enables end-to-end testing of the training pipeline without requiring external models or GPU resources.
 
 ### Test Output Example
 ```

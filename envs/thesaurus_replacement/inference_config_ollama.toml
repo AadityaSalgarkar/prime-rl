@@ -1,0 +1,17 @@
+# Inference configuration for Ollama local models
+# Copy this to inference_config.toml to use with Ollama
+
+[model]
+name = "qwen2.5:0.5b-instruct"  # Ollama format for Qwen/Qwen2.5-0.5B-Instruct
+base_url = "http://localhost:11434/v1" 
+api_key = "ollama"  # Ollama doesn't require real API key
+
+[server]
+port = 8000
+host = "0.0.0.0"
+
+# Sampling settings optimized for text reconstruction
+[sampling]
+temperature = 0.1  # Low temperature for more deterministic outputs
+max_tokens = 128
+top_p = 0.9

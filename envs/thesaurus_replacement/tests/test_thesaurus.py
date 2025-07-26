@@ -12,14 +12,14 @@ import json
 import sys
 from pathlib import Path
 
-# Add current directory to path
-sys.path.insert(0, str(Path(__file__).parent))
+# Add parent directory to path (where thesaurus_loader.py is located)
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 def test_thesaurus_data():
     """Test that the thesaurus data file is properly formatted."""
     print("🧪 Testing thesaurus data format...")
     
-    data_path = Path(__file__).parent / "en_thesaurus.jsonl"
+    data_path = Path(__file__).parent.parent / "en_thesaurus.jsonl"
     
     if not data_path.exists():
         print(f"❌ Data file not found at {data_path}")
@@ -172,7 +172,7 @@ def test_environment_integration():
         ]
         
         for config_file in config_files:
-            config_path = Path(__file__).parent / config_file
+            config_path = Path(__file__).parent.parent / config_file
             if config_path.exists():
                 print(f"✅ Config file exists: {config_file}")
                 # Validate basic TOML structure
@@ -187,7 +187,7 @@ def test_environment_integration():
                 return False
         
         # Test that registry file exists and contains our environment
-        repo_root = Path(__file__).parent.parent.parent
+        repo_root = Path(__file__).parent.parent.parent.parent
         registry_path = repo_root / "src" / "prime_rl" / "environments" / "registry.py"
         
         if registry_path.exists():
