@@ -1,0 +1,16 @@
+# Mock inference configuration for swap tracking environment
+# Copy this to inference_config.toml to use with mock server
+# Start mock server first: ./mock_server.py
+
+[model]
+name = "mock-identity"  # Options: mock-identity, mock-simple, mock-swap-aware, mock-random
+base_url = "http://localhost:8888/v1"
+api_key = "mock"
+
+[mock]
+mode = "identity"  # identity, simple_completion, swap_aware, random
+n_boxes = 10
+
+[generation]
+max_tokens = 128
+temperature = 0.0

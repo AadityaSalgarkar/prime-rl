@@ -13,7 +13,9 @@
       "Bash(chmod:*)",
       "Bash(./tests/test_mock_inference.py)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(./tests/test_full_pipeline.py)",
+      "Bash(./tests/run_all_tests.py --required-only)"
     ],
     "deny": []
   }

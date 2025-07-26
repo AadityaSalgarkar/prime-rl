@@ -666,6 +666,79 @@ def load_wordle_nothink_environment(num_train_examples: int = 2000, num_eval_exa
     return vf_env
 
 
+def load_swap_tracking_environment(
+    n_boxes: int = 10,
+    n_swaps: int = 20,
+    num_examples: int = 1000,
+    **kwargs
+) -> Environment:
+    """
+    Load swap tracking environment for RLVR training.
+    
+    The environment tests a model's ability to track box positions
+    through a sequence of swaps and predict final arrangements.
+    
+    Args:
+        n_boxes: Number of boxes (default: 10)
+        n_swaps: Number of swaps per task (default: 20)
+        num_examples: Number of training examples to generate (default: 1000)
+    """
+    import random
+    import sys
+    from pathlib import Path
+    
+    # Add the swap_tracking directory to path
+    env_dir = Path(__file__).parent.parent.parent / "envs" / "swap_tracking"
+    sys.path.insert(0, str(env_dir))
+    
+    from swap_tracking_loader import SwapTrackingLoader
+    
+    # Create loader
+    loader = SwapTrackingLoader(n_boxes=n_boxes, n_swaps=n_swaps)
+    
+    # Generate training examples
+    examples = loader.generate_training_examples(num_examples, seed=42)
+    
+    # Create dataset
+    from datasets import Dataset
+    dataset = Dataset.from_list(examples)
+    dataset = dataset.shuffle(seed=42)
+    
+    # Define parser (simple text parser)
+    parser = vf.Parser()
+    
+    def position_accuracy_reward(completion, answer, info, **kwargs) -> float:
+        """
+        Compute position-wise accuracy reward.
+        Returns fraction of box positions that are correctly predicted.
+        """
+        # Parse completion
+        response = parser.parse_answer(completion) or ""
+        
+        # Get the true final state from info
+        final_state = info.get("final_state", [])
+        if not final_state:
+            return 0.0
+        
+        # Use the loader's calculate_reward method
+        return loader.calculate_reward(response, final_state)
+    
+    # Create rubric
+    rubric = vf.Rubric(
+        funcs=[position_accuracy_reward],
+        weights=[1.0],
+    )
+    
+    # Create environment
+    vf_env = vf.SingleTurnEnv(
+        dataset=dataset,
+        parser=parser,
+        rubric=rubric,
+    )
+    
+    return vf_env
+
+
 ### Eval Environments ###
 
 
@@ -958,6 +1031,11 @@ REGISTRY = {
         "load_fn": load_wordle_nothink_environment,
         "type": "train",
         "tags": ["game", "multi-turn"],
+    },
+    "swap-tracking": {
+        "load_fn": load_swap_tracking_environment,
+        "type": "train",
+        "tags": ["reasoning", "tracking", "sequence"],
     },
     # eval
     "gpqa": {

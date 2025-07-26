@@ -1,0 +1,7 @@
+max_steps = 30
+
+[model]
+name = "Qwen/Qwen2.5-0.5B-Instruct"
+
+[optim]
+lr = 3e-6

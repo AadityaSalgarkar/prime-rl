@@ -1,0 +1,12 @@
+# Ollama local inference configuration for swap tracking environment
+# Copy this to inference_config.toml to use with Ollama
+# Make sure you have the model installed: ollama pull qwen2.5:0.5b-instruct
+
+[model]
+name = "qwen2.5:0.5b-instruct"
+base_url = "http://localhost:11434/v1"
+api_key = "ollama"
+
+[generation]
+max_tokens = 128
+temperature = 0.0
