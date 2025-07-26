@@ -233,6 +233,331 @@ uv run inference @ configs/inference/debug.toml
 - When running tests, create a standalone script
 - For tests, use a standalone script and run them with ./script.py
 
+## Creating New RLVR Environments
+
+### Complete Step-by-Step Guide
+
+This section provides a comprehensive guide for creating new RLVR environments, based on the successful implementation of the thesaurus replacement environment.
+
+#### Phase 1: Planning and Setup
+
+**1. Create Environment Branch**
+```bash
+# Create new branch for environment development
+git checkout -b env/your_environment_name
+
+# Create environment directory
+mkdir -p envs/your_environment_name
+cd envs/your_environment_name
+```
+
+**2. Define Environment Scope**
+Create a planning document with:
+- **Task Description**: Clear objective and success criteria
+- **Input/Output Format**: Expected data structures
+- **Reward Function**: How to measure success (exact matching, semantic similarity, etc.)
+- **Data Requirements**: External datasets, APIs, or generated data needed
+- **Evaluation Metrics**: Success thresholds and performance expectations
+
+**3. Research Existing Patterns**
+```bash
+# Study existing environments for patterns
+ls envs/
+cat src/prime_rl/environments/registry.py
+grep -r "SingleTurnEnv\|MultiTurnEnv" src/
+```
+
+#### Phase 2: Core Implementation
+
+**4. Implement Environment Logic**
+Create the core environment file (e.g., `your_env_loader.py`):
+```python
+# Essential components:
+# - Data loading and preprocessing
+# - Text augmentation/corruption logic  
+# - Reward function implementation
+# - Integration with verifiers library
+
+class YourEnvironmentLoader:
+    def __init__(self, **kwargs):
+        # Initialize data sources, models, external APIs
+        pass
+    
+    def process_text(self, text: str) -> tuple[str, dict]:
+        # Implement text augmentation/corruption
+        # Return (augmented_text, metadata)
+        pass
+    
+    def calculate_reward(self, original: str, response: str) -> float:
+        # Implement reward logic (0.0 to 1.0)
+        # Consider: exact matching, semantic similarity, task-specific metrics
+        pass
+```
+
+**5. Register Environment**
+Add to `src/prime_rl/environments/registry.py`:
+```python
+def load_your_environment(**kwargs) -> Environment:
+    """Load your custom environment."""
+    # Implement environment setup
+    # Return configured vf.SingleTurnEnv or vf.MultiTurnEnv
+    pass
+
+REGISTRY = {
+    # ... existing environments
+    "your-environment-id": {
+        "load_fn": load_your_environment,
+        "type": "train",
+        "tags": ["your-task-type", "relevant-tags"],
+    },
+}
+```
+
+#### Phase 3: Configuration
+
+**6. Create Configuration Files**
+Create three configuration files following existing patterns:
+
+**trainer_config.toml**:
+```toml
+# Training parameters
+max_steps = 30  # Start small for testing
+batch_size = 8
+micro_batch_size = 1
+learning_rate = 3e-6
+
+[model]
+name = "Qwen/Qwen2.5-0.5B-Instruct"  # Start with small model
+
+[optimizer]
+name = "adamw"
+weight_decay = 0.01
+
+[scheduler]
+name = "cosine"
+warmup_steps = 3
+```
+
+**orchestrator_config.toml**:
+```toml
+# Environment and data generation
+batch_size = 8
+async_level = 2
+
+[environment]
+id = "your-environment-id"
+
+[environment.args]
+# Your environment-specific parameters
+param1 = "value1"
+param2 = 42
+
+[data]
+num_examples = 1000
+```
+
+**inference_config.toml**:
+```toml
+# Inference server configuration
+[model]
+name = "Qwen/Qwen2.5-0.5B-Instruct"
+max_model_len = 2048
+
+[server]
+host = "0.0.0.0"
+port = 8000
+```
+
+#### Phase 4: Testing Infrastructure
+
+**7. Create Core Functionality Tests**
+`tests/test_your_environment.py`:
+```bash
+#!/usr/bin/env -S uv run --script
+# /// script
+# dependencies = [
+#   "your-required-packages"
+# ]
+# requires-python = ">=3.8"
+# ///
+
+# Test components:
+# - Data loading and format validation
+# - Core environment logic
+# - Reward function accuracy
+# - Environment integration
+# - Configuration compatibility
+```
+
+**8. Add Local Inference Testing**
+`tests/test_inference_ollama.py`:
+```bash
+#!/usr/bin/env -S uv run --script
+# /// script
+# dependencies = ["requests", "openai"]
+# requires-python = ">=3.8"
+# ///
+
+# Test local inference with Ollama:
+# - API connection and model availability
+# - Basic inference functionality
+# - Environment-specific task testing
+# - Configuration templates
+```
+
+**9. Implement Mock Inference System**
+For development and testing without external dependencies:
+
+`mock_inference.py`:
+```python
+# Mock inference modes:
+# - Identity: Perfect accuracy testing
+# - Simple: Basic completion testing
+# - Task-aware: Heuristic-based responses
+```
+
+`mock_server.py`:
+```python
+# FastAPI server with OpenAI-compatible API
+# Enables training pipeline testing without GPU
+```
+
+#### Phase 5: Advanced Testing
+
+**10. Create Full Pipeline Testing**
+`tests/test_full_pipeline.py`:
+```bash
+#!/usr/bin/env -S uv run --script
+# /// script
+# dependencies = ["torch", "transformers", "requests", "openai", "rich"]
+# requires-python = ">=3.8"
+# ///
+
+# Test complete workflow:
+# - Orchestrator integration
+# - Training simulation
+# - End-to-end pipeline validation
+```
+
+**11. Add macOS-Compatible Training**
+`mock_trainer.py`:
+```python
+# Complete RL training simulation:
+# - CPU-only operation (no CUDA dependencies)
+# - Rich console output with progress tracking
+# - Realistic metrics and checkpointing
+# - Orchestrator + Trainer + Inference in one script
+```
+
+#### Phase 6: Documentation and Validation
+
+**12. Create Comprehensive Documentation**
+`README.md` should include:
+- Task description with clear examples
+- Setup instructions (data downloads, dependencies)
+- Configuration options and parameters
+- Testing procedures (local, cloud, mock)
+- Performance expectations and model recommendations
+- Usage examples for different scenarios
+
+**13. Create Test Orchestration**
+`tests/run_all_tests.py`:
+```bash
+#!/usr/bin/env -S uv run --script
+# /// script
+# dependencies = ["requests", "openai"]
+# requires-python = ">=3.8"
+# ///
+
+# Orchestrate all test suites:
+# - Core functionality tests
+# - Local inference tests  
+# - Mock inference tests
+# - Full pipeline tests
+# - Comprehensive reporting
+```
+
+#### Phase 7: Validation and Deployment
+
+**14. Run Complete Test Suite**
+```bash
+# Test individual components
+./tests/test_your_environment.py
+./tests/test_inference_ollama.py
+./tests/test_mock_inference.py
+./tests/test_full_pipeline.py
+
+# Run complete test suite
+./tests/run_all_tests.py
+
+# Test with mock training pipeline
+./mock_trainer.py --steps 20 --batch-size 8
+```
+
+**15. Validate with Real Training**
+```bash
+# Test with debug configs (minimal steps)
+uv run rl \
+  --trainer @ envs/your_environment/trainer_config.toml \
+  --orchestrator @ envs/your_environment/orchestrator_config.toml \
+  --inference @ envs/your_environment/inference_config.toml
+
+# Scale up for full training once validated
+```
+
+**16. Git Workflow**
+```bash
+# Commit core implementation
+git add -A
+git commit -m "Add core implementation for your environment"
+
+# Commit testing infrastructure  
+git add tests/ mock_*.py
+git commit -m "Add comprehensive testing suite for your environment"
+
+# Commit final features
+git add README.md mock_trainer.py tests/test_full_pipeline.py
+git commit -m "Add complete training pipeline testing and documentation"
+```
+
+#### Key Success Patterns
+
+**Environment Structure**:
+```
+envs/your_environment/
+├── README.md                    # Complete documentation
+├── your_env_loader.py          # Core functionality
+├── data_file.ext               # Required data (if applicable)
+├── trainer_config.toml         # Training configuration
+├── orchestrator_config.toml    # Environment configuration  
+├── inference_config.toml       # Inference configuration
+├── inference_config_ollama.toml # Local inference template
+├── inference_config_mock.toml  # Mock inference template
+├── mock_inference.py           # Mock model implementation
+├── mock_server.py             # Mock inference server
+├── mock_trainer.py            # macOS-compatible training simulator
+└── tests/
+    ├── test_your_environment.py    # Core functionality tests
+    ├── test_inference_ollama.py    # Local inference tests
+    ├── test_mock_inference.py      # Mock inference tests
+    ├── test_full_pipeline.py       # Complete pipeline tests
+    └── run_all_tests.py            # Test orchestration
+```
+
+**Testing Philosophy**:
+- **Progressive Testing**: Core → Integration → Full Pipeline
+- **Multiple Inference Options**: Cloud → Local (Ollama) → Mock
+- **macOS Compatibility**: CPU-only development and testing
+- **Standalone Scripts**: uv script format for easy execution
+- **Comprehensive Coverage**: All components and workflows tested
+
+**Development Timeline**:
+- **Day 1**: Planning, core implementation, basic tests
+- **Day 2**: Configuration, local inference, advanced testing
+- **Day 3**: Mock systems, full pipeline, documentation, validation
+
+This methodology ensures robust, well-tested environments that integrate seamlessly with the prime-rl framework while supporting multiple development and deployment scenarios.
+
 ## Example: Complete Environment Implementation
 
 ### Case Study: Thesaurus Replacement Environment
