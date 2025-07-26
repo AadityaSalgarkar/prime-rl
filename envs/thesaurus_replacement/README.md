@@ -91,16 +91,47 @@ This environment integrates with the prime-rl framework through:
 - Benefits from large-scale language model pre-training
 - Relatively fast training due to deterministic rewards
 
-# Instructions to run
-The environment can be run using:
+# Testing
+
+## Running Tests
+
+The environment includes a comprehensive test suite that validates all components:
+
+```bash
+# Run the standalone test script
+./test_thesaurus.py
+
+# Or using uv directly
+uv run --script test_thesaurus.py
 ```
-  uv run rl \
-    --trainer @
-  envs/thesaurus_replacement/trainer_config.toml \
-    --orchestrator @
-  envs/thesaurus_replacement/orchestrator_config.toml \
-    --inference @
-  envs/thesaurus_replacement/inference_config.toml
+
+The test suite validates:
+- ✅ **Data Format**: Thesaurus data file structure and content
+- ✅ **ThesaurusLoader**: Synonym lookup and text replacement functionality  
+- ✅ **Reward Function**: Word-level accuracy scoring logic
+- ✅ **Environment Integration**: Configuration files and registry setup
+
+### Test Output Example
+```
+🚀 Testing Thesaurus Replacement Environment
+==================================================
+🧪 Testing thesaurus data format...
+✅ Data file exists: en_thesaurus.jsonl
+✅ File size: 23.2 MB
+✅ Valid entries in first 1000: 1000/1000 (100.0%)
+
+📊 TEST SUMMARY: 4/4 tests passed
+🎉 All tests passed! Environment is ready for use.
+```
+
+# Instructions to Run
+
+The environment can be run using:
+```bash
+uv run rl \
+  --trainer @ envs/thesaurus_replacement/trainer_config.toml \
+  --orchestrator @ envs/thesaurus_replacement/orchestrator_config.toml \
+  --inference @ envs/thesaurus_replacement/inference_config.toml
 ```
 
 ## Registry Implementation
