@@ -1,0 +1,82 @@
+# Trainer Configuration for Creativity Environment
+# Optimized for creative text generation training
+
+# Training Steps
+max_steps = 50  # Start with smaller number for creativity fine-tuning
+
+[model]
+# Model configuration for creativity training
+model_name = "Qwen/Qwen2.5-0.5B-Instruct"  # Start with smaller model for experimentation
+trust_remote_code = true
+torch_dtype = "bfloat16"
+
+[data]
+# Data configuration
+batch_size = 8  # Smaller batch size for creative text
+micro_batch_size = 4
+seq_len = 1024  # Allow longer sequences for creative writing
+shuffle = true
+
+# Environment-specific data settings
+[data.creativity]
+num_train_samples = 1000  # Number of training prompts to generate
+num_eval_samples = 100    # Number of evaluation prompts
+reward_weights = { w_entropy = 1.0, w_distinct = 1.0, w_uncommon = 0.8, w_bigrams = 1.2, w_sentence_len_var = 0.6, w_word_len_var = 0.4, w_sentence_end_var = 0.5 }
+
+[optimizer]
+# Optimizer settings for creative writing
+learning_rate = 1e-5  # Conservative learning rate to preserve creativity
+weight_decay = 0.01
+warmup_steps = 10
+beta1 = 0.9
+beta2 = 0.999
+
+[scheduler]
+# Learning rate scheduler
+type = "cosine"
+eta_min = 1e-6
+
+[training]
+# Training behavior
+gradient_clipping = 1.0
+accumulate_grad_batches = 2
+eval_every = 10  # Evaluate frequently to monitor creativity metrics
+save_every = 25
+log_every = 5
+
+# Creativity-specific training settings
+creativity_focus = true
+diversity_regularization = 0.1  # Encourage diverse outputs
+repetition_penalty = 1.1
+
+[checkpointing]
+# Checkpoint settings
+save_top_k = 3
+monitor_metric = "creativity_score"
+mode = "max"
+save_last = true
+
+[logging]
+# Logging configuration
+log_level = "INFO"
+wandb_project = "prime-rl-creativity"
+wandb_tags = ["creativity", "text-generation", "rlvr"]
+
+# Log creativity-specific metrics
+creativity_metrics = [
+    "entropy_score",
+    "distinct_ratio", 
+    "uncommon_words",
+    "bigram_diversity",
+    "sentence_variance",
+    "word_variance",
+    "ending_variety"
+]
+
+[generation]
+# Text generation parameters during training
+max_new_tokens = 300
+temperature = 0.8  # Encourage creativity with higher temperature
+top_p = 0.9
+do_sample = true
+repetition_penalty = 1.1

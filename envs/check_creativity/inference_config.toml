@@ -1,0 +1,76 @@
+# Inference Configuration for Creativity Environment
+# Settings for running inference with creativity-trained models
+
+[model]
+# Model settings for inference
+enforce_eager = true
+trust_remote_code = true
+tensor_parallel_size = 1
+max_model_len = 2048
+
+# Creativity-optimized model parameters
+creativity_mode = true
+preserve_diversity = true
+
+[generation]
+# Generation parameters optimized for creative text
+max_tokens = 400
+temperature = 0.8        # Higher temperature for creative diversity
+top_p = 0.9
+top_k = 50
+repetition_penalty = 1.1
+length_penalty = 1.0
+do_sample = true
+
+# Creativity-specific generation settings
+encourage_creativity = true
+diversity_penalty = 0.1      # Penalize repetitive patterns
+novelty_boost = 0.2          # Boost unusual word choices
+creative_sampling = true
+
+[evaluation]
+# Evaluation settings during inference
+batch_size = 4
+eval_creativity_metrics = true
+save_detailed_metrics = true
+
+# Real-time creativity assessment
+[evaluation.creativity]
+calculate_live_scores = true     # Calculate creativity scores during generation
+threshold_filtering = false      # Don't filter based on creativity scores during inference
+save_component_scores = true     # Save individual creativity component scores
+
+[creativity_weights]
+# Same weights as training for consistent evaluation
+w_entropy = 1.0
+w_distinct = 1.0
+w_uncommon = 0.8
+w_bigrams = 1.2
+w_sentence_len_var = 0.6
+w_word_len_var = 0.4
+w_sentence_end_var = 0.5
+
+[output]
+# Output configuration
+format = "json"
+include_metadata = true
+include_creativity_scores = true
+
+# Creative output formatting
+[output.creativity]
+include_prompt_category = true
+include_reward_breakdown = true
+include_text_analysis = true
+save_generation_history = false  # Don't save full history during inference for efficiency
+
+[performance]
+# Performance optimization
+max_concurrent_requests = 4
+timeout_seconds = 30
+cache_enabled = true
+
+# Creativity-specific performance
+[performance.creativity]
+batch_creativity_scoring = true   # Score multiple outputs together for efficiency
+parallel_metric_calculation = true
+optimize_for_diversity = true     # Optimize generation process for diverse outputs

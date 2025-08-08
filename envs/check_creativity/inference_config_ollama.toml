@@ -1,0 +1,99 @@
+# Inference Configuration for Creativity Environment - Ollama Local Setup
+# Optimized settings for running creativity inference with Ollama locally
+
+[model]
+# Ollama model settings
+model_name = "qwen2.5:0.5b-instruct"  # Smaller model for local testing
+base_url = "http://localhost:11434"
+api_type = "ollama"
+enforce_eager = false  # Not applicable for Ollama
+trust_remote_code = false  # Not applicable for Ollama
+
+# Local model optimization
+local_inference = true
+cache_enabled = true
+keep_alive = "5m"  # Keep model loaded for 5 minutes
+
+[generation]
+# Generation parameters optimized for local creative text
+max_tokens = 300
+temperature = 0.8        # Higher temperature for creative diversity
+top_p = 0.9
+top_k = 50
+repetition_penalty = 1.1
+length_penalty = 1.0
+do_sample = true
+
+# Creativity-specific generation settings
+encourage_creativity = true
+diversity_penalty = 0.1      # Penalize repetitive patterns
+novelty_boost = 0.2          # Boost unusual word choices
+creative_sampling = true
+
+# Streaming settings for better UX
+stream = true
+num_predict = 300
+
+[evaluation]
+# Evaluation settings for local inference
+batch_size = 1  # Process one at a time for local
+eval_creativity_metrics = true
+save_detailed_metrics = true
+
+# Real-time creativity assessment
+[evaluation.creativity]
+calculate_live_scores = true     # Calculate creativity scores during generation
+threshold_filtering = false      # Don't filter based on creativity scores during inference
+save_component_scores = true     # Save individual creativity component scores
+
+[creativity_weights]
+# Same weights as training for consistent evaluation
+w_entropy = 1.0
+w_distinct = 1.0
+w_uncommon = 0.8
+w_bigrams = 1.2
+w_sentence_len_var = 0.6
+w_word_len_var = 0.4
+w_sentence_end_var = 0.5
+
+[output]
+# Output configuration for local testing
+format = "json"
+include_metadata = true
+include_creativity_scores = true
+
+# Creative output formatting
+[output.creativity]
+include_prompt_category = true
+include_reward_breakdown = true
+include_text_analysis = true
+save_generation_history = true  # Save full history for local analysis
+
+[performance]
+# Performance optimization for local hardware
+max_concurrent_requests = 1  # Single request at a time
+timeout_seconds = 60         # Longer timeout for local processing
+cache_enabled = true
+parallel_processing = false  # Disable for local inference
+
+# Creativity-specific performance
+[performance.creativity]
+batch_creativity_scoring = false  # Score individually for local
+parallel_metric_calculation = false  # Sequential for local stability
+optimize_for_diversity = true      # Still optimize for diverse outputs
+
+[logging]
+# Enhanced logging for local testing
+log_level = "DEBUG"
+log_requests = true
+log_responses = true
+log_creativity_scores = true
+
+[local_settings]
+# Ollama-specific settings
+model_keep_alive = "5m"
+num_ctx = 2048           # Context length
+num_thread = 4           # CPU threads to use
+temperature = 0.8
+top_k = 40
+top_p = 0.9

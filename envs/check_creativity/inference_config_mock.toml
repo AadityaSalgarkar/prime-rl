@@ -1,0 +1,120 @@
+# Mock Inference Configuration for Creativity Environment
+# For testing and development without actual model inference
+
+[model]
+# Mock model settings
+model_name = "mock-creativity-model"
+api_type = "mock"
+enforce_eager = false
+trust_remote_code = false
+
+# Mock model behavior
+mock_mode = "creative"  # Options: "creative", "basic", "random"
+response_quality = "high"  # Options: "high", "medium", "low"
+simulated_latency = 0.5  # Seconds to wait per request
+
+[generation]
+# Generation parameters for mock responses
+max_tokens = 300
+temperature = 0.8
+top_p = 0.9
+top_k = 50
+repetition_penalty = 1.1
+
+# Mock-specific generation
+mock_creativity_level = "high"  # Controls how creative mock responses are
+include_variety = true  # Include varied sentence structures
+use_creative_vocabulary = true  # Use unusual words in mock responses
+
+[mock_responses]
+# Pre-configured creative responses for testing
+storytelling = [
+    "In the twilight realm where shadows dance with forgotten memories, there existed a peculiar library whose books wrote themselves each midnight. The weathered librarian, whose eyes held the luminescence of captured starlight, would whisper secrets to the empty shelves, watching as gossamer threads of narrative materialized into tangible stories.",
+    "The clockmaker's daughter discovered that each timepiece in her father's shop contained a different rhythm of existence. Some ticked with the heartbeat of hummingbirds, others pulsed with the slow, ancient breath of mountains. When she wound the celestial chronometer at the shop's center, time itself became malleable, stretching and contracting like warm honey in her fingers.",
+]
+
+poetry = [
+    "Silence tastes of silver rain / on copper-colored autumn leaves, / while whispered words bloom crystalline / in gardens where the moon grieves. / Each breath becomes a painted note / upon the canvas of the night, / where dreams and waking thoughts devote / themselves to dance in fading light.",
+    "Between the spaces of heartbeats / lie infinite symphonies unheard, / where color sings and shadow meets / the echo of each unspoken word. / Time moves like honey through my veins, / sweet amber capturing moments bright, / while consciousness itself explains / the texture of perceived delight.",
+]
+
+descriptive = [
+    "The marketplace existed in the liminal space between sleeping and waking, where vendors sold bottled laughter and crystallized tears. Gossamer curtains separated stalls offering memories in mason jars, their contents swirling with opalescent mist that tasted of childhood summers and forgotten names.",
+    "The garden breathed with photosynthetic sighs, each leaf a miniature lung exhaling stories into the perfumed air. Flowers bloomed backwards through time, their petals unfurling from wilted brown to vibrant youth, while the ancient oak at its center hummed lullabies in languages that predated human speech.",
+]
+
+philosophical = [
+    "What if consciousness itself is merely the universe's attempt to understand its own existence through countless fragmentary perspectives? Each mind becomes a unique lens through which infinity observes itself, creating meaning from the intersection of awareness and experience, like light refracting through a prism of individual understanding.",
+    "The weight of unspoken words accumulates in the spaces between conversations, creating invisible archives of potential meaning that hover in the air around us. Perhaps silence is not the absence of communication, but rather its most profound form—a language of pauses that speaks volumes about the ineffable nature of human connection.",
+]
+
+experimental = [
+    "words | cascade | through | neural | pathways || SUDDEN || like || digital || rain ||| each || thought || fragments || into || kaleidoscopic || meaning || ??? || where || punctuation || becomes || rhythm || and || syntax || dissolves || into || pure || expression ||||||",
+    "The question-mark-shaped-thoughts-dance-between-semicolons; while exclamation-points! burst! like! fireworks! in! the! mind's! eye! and periods. become. stepping. stones. across. the. river. of. consciousness. flowing. ever. flowing. into. the. ocean. of. collective. understanding???",
+]
+
+[evaluation]
+# Mock evaluation settings
+batch_size = 4
+eval_creativity_metrics = true
+save_detailed_metrics = true
+
+# Mock scores - simulate realistic creativity scoring
+[evaluation.mock_scores]
+entropy_range = [3.0, 7.5]
+distinct_ratio_range = [0.4, 0.9]
+uncommon_words_range = [0.1, 0.4]
+bigram_diversity_range = [0.6, 0.95]
+sentence_variance_range = [1.0, 4.0]
+word_variance_range = [1.5, 3.0]
+ending_variety_range = [0.5, 2.0]
+
+# Total score calculation for mock
+total_score_base = 5.0
+creativity_bonus_max = 4.0
+quality_multiplier = 1.2
+
+[creativity_weights]
+# Same weights as training for consistent evaluation
+w_entropy = 1.0
+w_distinct = 1.0
+w_uncommon = 0.8
+w_bigrams = 1.2
+w_sentence_len_var = 0.6
+w_word_len_var = 0.4
+w_sentence_end_var = 0.5
+
+[output]
+# Output configuration for mock testing
+format = "json"
+include_metadata = true
+include_creativity_scores = true
+include_mock_info = true  # Include information about mock generation
+
+# Mock-specific output
+[output.mock]
+include_response_category = true    # Show which category the response came from
+include_simulated_metrics = true    # Show the simulated creativity metrics
+include_generation_log = true       # Show mock generation process
+show_expected_scores = true         # Show what scores the response should achieve
+
+[performance]
+# Performance settings for mock inference
+max_concurrent_requests = 8  # Can handle more since it's just mock
+timeout_seconds = 5          # Short timeout for mock responses
+cache_enabled = false        # Don't cache mock responses
+simulate_realistic_timing = true  # Add realistic delays
+
+# Mock performance simulation
+[performance.mock]
+base_latency = 0.5              # Base processing time in seconds
+latency_variance = 0.3          # Random variance in processing time
+memory_usage_simulation = true   # Simulate memory usage patterns
+cpu_usage_simulation = true      # Simulate CPU usage patterns
+
+[logging]
+# Logging for mock inference
+log_level = "INFO"
+log_mock_decisions = true    # Log how mock responses are chosen
+log_creativity_calculations = true  # Log mock creativity score calculations
+save_mock_session = true     # Save complete mock session for analysis

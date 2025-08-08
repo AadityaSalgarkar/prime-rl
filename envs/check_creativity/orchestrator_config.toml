@@ -1,0 +1,102 @@
+# Orchestrator Configuration for Creativity Environment
+# Manages the creativity training environment and coordination
+
+# Basic orchestrator settings
+max_steps = 30  # Number of orchestration steps
+batch_size = 8   # Batch size for parallel creativity evaluation
+micro_batch_size = 4
+seq_len = 1024   # Sequence length for creative text
+
+[environment]
+# Environment-specific settings
+env_id = "creativity"
+max_concurrent = 4  # Number of concurrent creativity evaluations
+
+# Creativity environment parameters
+[environment.creativity]
+num_train_samples = 1000
+num_eval_samples = 100
+max_prompt_length = 150
+seed = 42
+
+# Custom reward weights for creativity evaluation
+[environment.creativity.reward_weights]
+w_entropy = 1.0              # Word distribution entropy
+w_distinct = 1.0             # Distinct word ratio
+w_uncommon = 0.8             # Uncommon word usage
+w_bigrams = 1.2              # Bigram diversity
+w_sentence_len_var = 0.6     # Sentence length variance
+w_word_len_var = 0.4         # Word length variance
+w_sentence_end_var = 0.5     # Sentence ending variety
+
+[sampling]
+# Sampling parameters for creative text generation
+max_tokens = 300
+temperature = 0.8    # Higher temperature for creativity
+top_p = 0.9
+top_k = 50
+do_sample = true
+repetition_penalty = 1.1
+
+# Creativity-specific sampling
+encourage_diversity = true
+min_length = 50      # Minimum response length
+max_length = 400     # Maximum response length
+
+[rewards]
+# Reward configuration for creativity training
+normalize_rewards = true
+reward_scale = 1.0
+baseline_subtract = true
+
+# Creativity reward components
+[rewards.creativity]
+primary_weight = 1.0      # Main creativity score weight
+format_weight = 0.2       # Format/structure weight
+length_weight = 0.1       # Appropriate length weight
+
+# Bonus rewards for exceptional creativity
+exceptional_creativity_bonus = 0.5    # Bonus for scores > 8.0
+diversity_bonus = 0.3                 # Bonus for high diversity metrics
+originality_bonus = 0.4               # Bonus for unusual word usage
+
+[evaluation]
+# Evaluation settings
+eval_frequency = 10          # Evaluate every N steps
+eval_samples = 50           # Number of samples to evaluate
+save_eval_outputs = true    # Save evaluation outputs for analysis
+
+# Creativity-specific evaluation
+[evaluation.creativity]
+analyze_components = true           # Analyze individual creativity components
+track_improvement = true            # Track improvement over time
+save_best_examples = true          # Save best creative examples
+minimum_creativity_threshold = 3.0  # Minimum acceptable creativity score
+
+[metrics]
+# Metrics tracking
+track_detailed = true
+save_frequency = 5
+
+# Creativity metrics to track
+creativity_metrics = [
+    "average_creativity_score",
+    "entropy_distribution", 
+    "distinct_word_trends",
+    "uncommon_word_usage",
+    "sentence_variety",
+    "creativity_improvement",
+    "reward_correlation"
+]
+
+[logging]
+# Logging configuration
+log_level = "INFO"
+save_logs = true
+log_creativity_examples = true  # Log example creative outputs
+
+# Creativity-specific logging
+[logging.creativity]
+log_top_examples = 5           # Number of top creative examples to log
+log_reward_breakdown = true    # Log detailed reward component breakdown
+log_prompt_categories = true   # Log performance by prompt category

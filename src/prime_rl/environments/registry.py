@@ -666,6 +666,23 @@ def load_wordle_nothink_environment(num_train_examples: int = 2000, num_eval_exa
     return vf_env
 
 
+def load_creativity_environment(**kwargs) -> Environment:
+    """Load creativity environment for training creative text generation."""
+    import sys
+    from pathlib import Path
+    
+    # Add the envs directory to Python path to import creativity modules
+    repo_root = Path(__file__).parent.parent.parent.parent
+    creativity_env_path = repo_root / "envs" / "check_creativity"
+    sys.path.insert(0, str(creativity_env_path))
+    
+    try:
+        from creativity_loader import load_creativity_environment
+        return load_creativity_environment(**kwargs)
+    except ImportError as e:
+        raise ImportError(f"Could not import creativity environment: {e}. Make sure envs/check_creativity is properly set up.")
+
+
 ### Eval Environments ###
 
 
@@ -958,6 +975,11 @@ REGISTRY = {
         "load_fn": load_wordle_nothink_environment,
         "type": "train",
         "tags": ["game", "multi-turn"],
+    },
+    "creativity": {
+        "load_fn": load_creativity_environment,
+        "type": "train", 
+        "tags": ["creative-writing", "text-generation", "diversity"],
     },
     # eval
     "gpqa": {
